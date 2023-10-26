@@ -28,7 +28,9 @@ class StartScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'Preparati per l\'esame rispondendo alle 15 domande che seguiranno.\nPer superarlo, potrai fare al massimo 5 errori',
+              'Questa applicazione ti permetterà di esercitarti all\'esame antincendio\n'
+              '\nPreparati per l\'esame rispondendo alle 15 domande che seguiranno\n'
+              '\nPer superarlo, potrai fare al massimo 5 errori',
               style: TextStyle(
                 fontSize: 18.0,
               ),
@@ -111,7 +113,6 @@ class _QuizScreenState extends State<QuizScreen> {
 
       answerOptions.shuffle(Random());
 
-
       final question = Question(
         questionText: questionText,
         correctAnswer: correctAnswer,
@@ -147,7 +148,13 @@ class _QuizScreenState extends State<QuizScreen> {
           if(answeredQuestions == 15){
             Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
-                  builder: (BuildContext context) => QuizResult(correctAnswers: correctAnswers, incorrectAnswers: incorrectAnswers, totalQuestions: totalQuestions),
+                  builder: (BuildContext context) => QuizResult(
+                    correctAnswers: correctAnswers,
+                    incorrectAnswers: incorrectAnswers,
+                    totalQuestions: totalQuestions,
+                    shuffledQuestions: [],
+                    answerOptions: [],
+                    selectedOptionIndex: selectedOptionIndex),
                 ),
             );
           }
@@ -220,7 +227,10 @@ class _QuizScreenState extends State<QuizScreen> {
                     builder: (BuildContext context) => QuizResult(
                         correctAnswers: correctAnswers,
                         incorrectAnswers: incorrectAnswers,
-                        totalQuestions: totalQuestions),
+                        totalQuestions: totalQuestions,
+                        shuffledQuestions: [],
+                        answerOptions: [],
+                        selectedOptionIndex: selectedOptionIndex),
                   ),
                 );
               },
@@ -242,6 +252,7 @@ class QuestionWidget extends StatelessWidget {
   final int currentQuestionIndex;
   final Function() onNextQuestion;
 
+  int selectedOptionIndex = -1;
 
   QuestionWidget({
     required this.questionText,
@@ -252,8 +263,6 @@ class QuestionWidget extends StatelessWidget {
     required this.onNextQuestion,
   });
 
-  bool isSelected = false;
-  int selectedOptionIndex = -1;
 
   @override
   Widget build(BuildContext context) {
@@ -280,9 +289,7 @@ class QuestionWidget extends StatelessWidget {
                   value: index,
                   groupValue: selectedOptionIndex,
                   onChanged: (int? value) {
-                    isSelected = true; // Imposta isSelected su true quando una risposta viene selezionata
                     onAnswerSelected(answerOptions[value!]);
-                    MaterialStateColor.resolveWith((states) => Colors.blue);
                   },
                 )
               );
@@ -298,11 +305,17 @@ class QuizResult extends StatelessWidget {
   final int correctAnswers;
   final int incorrectAnswers;
   final int totalQuestions;
+  final List<Question> shuffledQuestions;
+  final List<String> answerOptions;
+  int selectedOptionIndex;
 
   QuizResult({
     required this.correctAnswers,
     required this.incorrectAnswers,
-    required this.totalQuestions
+    required this.totalQuestions,
+    required this.shuffledQuestions,
+    required this.answerOptions,
+    required this.selectedOptionIndex,
   });
 
   @override
@@ -325,6 +338,7 @@ class QuizResult extends StatelessWidget {
             SizedBox(height: 20.0),
             Text('Domande corrette: $correctAnswers'),
             Text('Domande sbagliate: $incorrectAnswers'),
+
             ElevatedButton(
               onPressed: () {
                 // Naviga alla schermata dei risultati
