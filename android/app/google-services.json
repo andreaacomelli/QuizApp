@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "403547072682",
+    "project_id": "app-quiz-sicurezza-aziendale",
+    "storage_bucket": "app-quiz-sicurezza-aziendale.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:403547072682:android:fc7ec73d06cd1c405108d3",
+        "android_client_info": {
+          "package_name": "com.example.quiz_app2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0-riBWGKeieZHhMi1CJEkWhfxrpTfhn0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

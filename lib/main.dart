@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'dart:math';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:csv/csv.dart';
 
 void main() => runApp(QuizApp());
 
@@ -7,88 +10,41 @@ class QuizApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Quiz App',
-      home: QuizScreen(),
+      title: 'Esame sicurezza aziendale',
+      home: StartScreen(),
     );
   }
 }
 
-class QuizScreen extends StatefulWidget {
-  @override
-  _QuizScreenState createState() => _QuizScreenState();
-}
-
-class _QuizScreenState extends State<QuizScreen> {
-  int _currentQuestionIndex = 0;
-  int _score = 0;
-  List<Question> _questions = [
-    Question(
-      questionText: 'Qual è la capitale dell\'Italia?',
-      options: ['Roma', 'Milano', 'Firenze', 'Napoli'],
-      correctOption: 'Roma',
-    ),
-    Question(
-      questionText: 'Qual è il più grande pianeta del sistema solare?',
-      options: ['Terra', 'Marte', 'Giove', 'Venere'],
-      correctOption: 'Giove',
-    ),
-    // Aggiungi più domande
-  ];
-
-  void _checkAnswer(String selectedOption) {
-    if (_questions[_currentQuestionIndex].correctOption == selectedOption) {
-      setState(() {
-        _score++;
-      });
-    }
-
-    setState(() {
-      if (_currentQuestionIndex < _questions.length - 1) {
-        _currentQuestionIndex++;
-      } else {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) => QuizResultScreen(
-              score: _score,
-              onRetryQuiz: () {
-                // Callback per riavviare il quiz
-                setState(() {
-                  _currentQuestionIndex = 0;
-                  _score = 0;
-                  _questions.shuffle(); // Mescola le domande
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ),
-        );
-      }
-    });
-  }
-
+class StartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Quiz App'),
+        title: Text('Esame sicurezza aziendale'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              _questions[_currentQuestionIndex].questionText,
-              style: TextStyle(fontSize: 24.0),
+              'Preparati per l\'esame rispondendo alle 15 domande che seguiranno.\nPer superarlo, potrai fare al massimo 5 errori',
+              style: TextStyle(
+                fontSize: 18.0,
+              ),
+              textAlign: TextAlign.center,
             ),
+
             SizedBox(height: 20.0),
-            Column(
-              children: _questions[_currentQuestionIndex]
-                  .options
-                  .map((option) => ElevatedButton(
-                onPressed: () => _checkAnswer(option),
-                child: Text(option),
-              ))
-                  .toList(),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => QuizScreen(),
+                  ),
+                );
+              },
+              child: Text('Inizia il Quiz'),
             ),
           ],
         ),
@@ -99,21 +55,255 @@ class _QuizScreenState extends State<QuizScreen> {
 
 class Question {
   final String questionText;
-  final List<String> options;
-  final String correctOption;
+  final String correctAnswer;
+  final List<String> answerOptions;
 
   Question({
     required this.questionText,
-    required this.options,
-    required this.correctOption,
+    required this.correctAnswer,
+    required this.answerOptions,
   });
 }
 
-class QuizResultScreen extends StatelessWidget {
-  final int score;
-  final VoidCallback onRetryQuiz;
+class QuizScreen extends StatefulWidget {
+  @override
+  _QuizScreenState createState() => _QuizScreenState();
+}
 
-  QuizResultScreen({required this.score, required this.onRetryQuiz});
+class _QuizScreenState extends State<QuizScreen> {
+  PageController pageController = PageController(initialPage: 0);
+  List<Question> questions = [];
+  int currentQuestionIndex = 0;
+  int totalQuestions = 0;
+  int correctAnswers = 0;
+  int incorrectAnswers = 0;
+  int maxQuestions = 15;
+  int answeredQuestions = 0;
+  int selectedOptionIndex = -1;
+
+  List<Question> shuffledQuestions = [];
+
+
+  @override
+  void initState() {
+    super.initState();
+    loadQuestions();
+    shuffledQuestions = shuffleQuestions(questions);
+  }
+
+  List<Question> shuffleQuestions(List<Question> questions) {
+    var random = Random();
+    List<Question> shuffledQuestions = List<Question>.from(questions);
+    shuffledQuestions.shuffle(random);
+    return shuffledQuestions;
+  }
+
+  Future<void> loadQuestions() async {
+    final String csvData = await rootBundle.loadString('assets/domande.csv');
+    final List<List<dynamic>> csvTable = CsvToListConverter().convert(csvData);
+    final List<Question> questionList = [];
+
+    for (var i = 1; i < csvTable.length; i++) { // Inizia da 1 per escludere l'intestazione
+      final questionData = csvTable[i];
+      final questionText = questionData[0] as String;
+      final correctAnswer = questionData[1] as String;
+      final answerOptions = List<String>.from(questionData.sublist(2));
+
+      answerOptions.shuffle(Random());
+
+
+      final question = Question(
+        questionText: questionText,
+        correctAnswer: correctAnswer,
+        answerOptions: answerOptions,
+      );
+      questionList.add(question);
+    }
+
+    questionList.shuffle(Random()); // Mescola ordine domande
+
+    setState(() {
+      questions = questionList;
+      totalQuestions = questions.length;
+    });
+  }
+
+  void checkAnswer(String userAnswer, String correctAnswer) {
+    if (userAnswer == correctAnswer) {
+      correctAnswers++;
+    } else {
+      incorrectAnswers++; // Incremento delle risposte sbagliate
+    }
+    onNextQuestion(); // Chiama la funzione per passare alla prossima domanda
+  }
+
+  void onNextQuestion() {
+    setState(() {
+      if (answeredQuestions < 15) {
+        if (currentQuestionIndex < totalQuestions - 1) {
+          currentQuestionIndex++;
+          pageController.nextPage(duration: Duration(milliseconds: 300), curve: Curves.ease);// Passa alla prossima domanda
+        } else {
+          if(answeredQuestions == 15){
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (BuildContext context) => QuizResult(correctAnswers: correctAnswers, incorrectAnswers: incorrectAnswers, totalQuestions: totalQuestions),
+                ),
+            );
+          }
+        }
+        answeredQuestions++; // Incrementa il numero di domande a cui hai risposto
+      }
+    });
+  }
+
+  void onAnswerSelected(String selectedAnswer) {
+    final questionData = shuffledQuestions[currentQuestionIndex];
+    checkAnswer(selectedAnswer, questionData.correctAnswer);
+    answeredQuestions++;
+
+    onNextQuestion();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Esame sicurezza Aziendale'),
+      ),
+        body: PageView.builder(
+          controller: pageController,
+          itemCount: totalQuestions,
+          itemBuilder: (context, index) {
+            if (index >= 15) {
+              return SizedBox.shrink();
+            }
+            final questionData = questions[index];
+            final questionText = questionData.questionText;
+            final correctAnswer = questionData.correctAnswer;
+            final answerOptions = questionData.answerOptions;
+            return QuestionWidget(
+              questionText: questionText,
+              correctAnswer: correctAnswer,
+              answerOptions: answerOptions,
+              currentQuestionIndex: currentQuestionIndex,
+              onAnswerSelected: (selectedAnswer) {
+                checkAnswer(selectedAnswer, correctAnswer);
+              },
+              onNextQuestion: () {
+                // Aggiorna l'indice selezionato alla domanda successiva
+                setState(() {
+                  onNextQuestion();
+                });
+              },
+            );
+          },
+        ),
+      floatingActionButton: answeredQuestions >= maxQuestions
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'Hai risposto a tutte le 15 domande',
+              style: TextStyle(
+                fontSize: 18.0,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            SizedBox(height: 20.0),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => QuizResult(
+                        correctAnswers: correctAnswers,
+                        incorrectAnswers: incorrectAnswers,
+                        totalQuestions: totalQuestions),
+                  ),
+                );
+              },
+              child: Text('Visualzizza il risultato'),
+            ),
+          ],
+        ),
+            )
+          : null, // Il pulsante appare solo quando hai risposto a tutte le domande
+    );
+  }
+}
+
+class QuestionWidget extends StatelessWidget {
+  final String questionText;
+  final String correctAnswer;
+  final List<String> answerOptions;
+  final Function(String) onAnswerSelected;
+  final int currentQuestionIndex;
+  final Function() onNextQuestion;
+
+
+  QuestionWidget({
+    required this.questionText,
+    required this.correctAnswer,
+    required this.answerOptions,
+    required this.onAnswerSelected,
+    required this.currentQuestionIndex,
+    required this.onNextQuestion,
+  });
+
+  bool isSelected = false;
+  int selectedOptionIndex = -1;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.blue, width: 2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: <Widget>[
+          Text(
+            questionText,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 16),
+          Column(
+            children: List.generate(answerOptions.length, (index) {
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: RadioListTile(
+                  title: Text(answerOptions[index]),
+                  value: index,
+                  groupValue: selectedOptionIndex,
+                  onChanged: (int? value) {
+                    isSelected = true; // Imposta isSelected su true quando una risposta viene selezionata
+                    onAnswerSelected(answerOptions[value!]);
+                    MaterialStateColor.resolveWith((states) => Colors.blue);
+                  },
+                )
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class QuizResult extends StatelessWidget {
+  final int correctAnswers;
+  final int incorrectAnswers;
+  final int totalQuestions;
+
+  QuizResult({
+    required this.correctAnswers,
+    required this.incorrectAnswers,
+    required this.totalQuestions
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -124,18 +314,26 @@ class QuizResultScreen extends StatelessWidget {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          children: [
             Text(
-              'Hai completato il quiz!',
-              style: TextStyle(fontSize: 24.0),
+              'Risultati del Quiz',
+              style: TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             SizedBox(height: 20.0),
-            Text(
-              'Punteggio: $score',
-              style: TextStyle(fontSize: 18.0),
-            ),
+            Text('Domande corrette: $correctAnswers'),
+            Text('Domande sbagliate: $incorrectAnswers'),
             ElevatedButton(
-              onPressed: onRetryQuiz,
+              onPressed: () {
+                // Naviga alla schermata dei risultati
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) =>QuizScreen()
+                    ),
+                ); // Torna alla schermata del quiz
+              },
               child: Text('Ritenta il Quiz'),
             ),
           ],
