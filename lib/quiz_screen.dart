@@ -1,17 +1,13 @@
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/material.dart';
+import 'question_widget.dart';
+import 'package:csv/csv.dart';
+import 'question_class.dart';
+import 'quiz_result.dart';
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter/material.dart';
-import 'package:csv/csv.dart';
-
-import 'quiz_response_class.dart';
-import 'question_widget.dart';
-import 'question_class.dart';
-import 'quiz_result.dart';
-
 class QuizScreen extends StatefulWidget {
-  const QuizScreen({super.key});
 
   @override
   _QuizScreenState createState() => _QuizScreenState();
@@ -27,84 +23,8 @@ class _QuizScreenState extends State<QuizScreen> {
   int maxQuestions = 15;
   int answeredQuestions = 0;
   int selectedOptionIndex = -1;
-  int _selectedOptionIndex = -1;
-  List<QuizResponse> answeredQuestionsList = [];
-  Map<int, QuizResponse> quizResponses = {};
+
   List<Question> shuffledQuestions = [];
-
-  void onAnswerSelected(String selectedAnswer, int selectedIndex) {
-    final questionData = shuffledQuestions[currentQuestionIndex];
-    checkAnswer(selectedAnswer, questionData.correctAnswer);
-
-    if (!answeredQuestionsList.any((element) => element.questionIndex == currentQuestionIndex)) {
-      answeredQuestionsList.add(QuizResponse(questionIndex: currentQuestionIndex, selectedAnswer: selectedAnswer));
-    }
-
-    answeredQuestions++;
-    setState(() {
-      _selectedOptionIndex = selectedIndex;
-    });
-
-    onNextQuestion();
-  }
-
-  void checkAnswer(String userAnswer, String correctAnswer) {
-    if (userAnswer == correctAnswer) {
-      correctAnswers++;
-    } else {
-      incorrectAnswers++;
-    }
-  }
-
-  void updateQuizResponses(int questionIndex, String selectedAnswer) {
-    quizResponses[questionIndex] = QuizResponse(questionIndex: questionIndex, selectedAnswer: selectedAnswer);
-  }
-
-  void onNextQuestion() {
-    int? index = (pageController.page)?.toInt();
-    setState(() {
-      if (index! < (maxQuestions - 1)) {
-        currentQuestionIndex++;
-
-        if (quizResponses.containsKey(currentQuestionIndex)) {
-          _selectedOptionIndex = shuffledQuestions[currentQuestionIndex]
-              .answerOptions
-              .indexOf(quizResponses[currentQuestionIndex]!.selectedAnswer);
-        } else {
-          _selectedOptionIndex = -1;
-        }
-
-        pageController.nextPage(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.ease,
-        );
-      } else {
-        if (answeredQuestions != index) {
-          // print("Answer all the questions");
-          // print(answeredQuestions);
-          // print(index);
-          // print(answeredQuestionsList);
-        } else {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (BuildContext context) =>
-                  QuizResult(
-                    correctAnswers: correctAnswers,
-                    incorrectAnswers: incorrectAnswers,
-                    totalQuestions: totalQuestions,
-                    shuffledQuestions: shuffledQuestions,
-                    selectedOptionIndex: _selectedOptionIndex,
-                    answerOptions: questions[currentQuestionIndex].answerOptions,
-                    questions: questions,
-                    currentQuestion: questions[currentQuestionIndex],
-                    quizResponses: quizResponses,
-                  ),
-            ),
-          );
-        }
-      }
-    });
-  }
 
   @override
   void initState() {
@@ -122,10 +42,10 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Future<void> loadQuestions() async {
     final String csvData = await rootBundle.loadString('assets/domande.csv');
-    final List<List<dynamic>> csvTable = const CsvToListConverter().convert(csvData);
+    final List<List<dynamic>> csvTable = CsvToListConverter().convert(csvData);
     final List<Question> questionList = [];
 
-    for (var i = 1; i < csvTable.length; i++) {
+    for (var i = 1; i < csvTable.length; i++) { // Inizia da 1 per escludere l'intestazione
       final questionData = csvTable[i];
       final questionText = questionData[0] as String;
       final correctAnswer = questionData[1] as String;
@@ -141,76 +61,127 @@ class _QuizScreenState extends State<QuizScreen> {
       questionList.add(question);
     }
 
-    questionList.shuffle(Random());
+    questionList.shuffle(Random()); // Mescola ordine domande
+
     setState(() {
       questions = questionList;
       totalQuestions = questions.length;
     });
   }
 
+  void checkAnswer(String userAnswer, String correctAnswer) {
+    if (userAnswer == correctAnswer) {
+      correctAnswers++;
+    } else {
+      incorrectAnswers++;
+    }
+    onNextQuestion();
+  }
+
+  void onNextQuestion() {
+    setState(() {
+      if (answeredQuestions < 15) {
+        // print(selectedOptionIndex);
+        if (currentQuestionIndex < totalQuestions - 1) {
+          currentQuestionIndex++;
+          pageController.nextPage(duration: Duration(milliseconds: 300), curve: Curves.ease);// Passa alla prossima domanda
+        } else {
+          if(answeredQuestions == 15){
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (BuildContext context) => QuizResult(
+                    correctAnswers: correctAnswers,
+                    incorrectAnswers: incorrectAnswers,
+                    totalQuestions: totalQuestions,
+                    shuffledQuestions: [],
+                    answerOptions: [],
+                    selectedOptionIndex: selectedOptionIndex),
+              ),
+            );
+          }
+        }
+        answeredQuestions++; // Incrementa il numero di domande a cui hai risposto
+      }
+    });
+  }
+
+  void onAnswerSelected(String selectedAnswer) {
+    final questionData = shuffledQuestions[currentQuestionIndex];
+    checkAnswer(selectedAnswer, questionData.correctAnswer);
+    answeredQuestions++;
+
+    onNextQuestion();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Esame sicurezza Aziendale'),
+        title: Text('Esame sicurezza Aziendale'),
       ),
       body: PageView.builder(
         controller: pageController,
         itemCount: totalQuestions,
         itemBuilder: (context, index) {
-          if (index >= maxQuestions) {
-            return const SizedBox.shrink();
+          if (index >= 15) {
+            return SizedBox.shrink();
           }
           final questionData = questions[index];
           final questionText = questionData.questionText;
+          final correctAnswer = questionData.correctAnswer;
           final answerOptions = questionData.answerOptions;
-
           return QuestionWidget(
             questionText: questionText,
+            correctAnswer: correctAnswer,
             answerOptions: answerOptions,
-            answeredQuestionsList: answeredQuestionsList,
-            onAnswerSelected: onAnswerSelected,
-            onNextQuestion: onNextQuestion,
+            currentQuestionIndex: currentQuestionIndex,
+            onAnswerSelected: (selectedAnswer) {
+              checkAnswer(selectedAnswer, correctAnswer);
+            },
+            onNextQuestion: () {
+              // Aggiorna l'indice selezionato alla domanda successiva
+              setState(() {
+                onNextQuestion();
+              });
+            },
           );
         },
       ),
+
       floatingActionButton: answeredQuestions >= maxQuestions
           ? Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  'Rispondi a tutte le $maxQuestions domande',
-                  style: const TextStyle(
+                  'Hai risposto a tutte le 15 domande',
+                  style: TextStyle(
                     fontSize: 18.0,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 20.0),
+
+                SizedBox(height: 20.0),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).push(
+                    Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (BuildContext context) => QuizResult(
-                          correctAnswers: correctAnswers,
-                          incorrectAnswers: incorrectAnswers,
-                          totalQuestions: totalQuestions,
-                          shuffledQuestions: shuffledQuestions,
-                          selectedOptionIndex: _selectedOptionIndex,
-                          answerOptions: questions[currentQuestionIndex].answerOptions,
-                          questions: questions,
-                          currentQuestion: questions[currentQuestionIndex],
-                          quizResponses: quizResponses,
-                        ),
+                            correctAnswers: correctAnswers,
+                            incorrectAnswers: incorrectAnswers,
+                            totalQuestions: totalQuestions,
+                            shuffledQuestions: [],
+                            answerOptions: [],
+                            selectedOptionIndex: selectedOptionIndex),
                       ),
                     );
                   },
-                  child: const Text('Visualizza i risultati'),
+                  child: Text('Visualzizza il risultato'),
                 ),
               ],
             ),
-          )
-          : null,
+      )
+          : null, // Il pulsante appare solo quando hai risposto a tutte le domande
     );
   }
 }

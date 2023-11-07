@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-import 'quiz_response_class.dart';
 import 'question_class.dart';
 import 'quiz_screen.dart';
 
@@ -11,38 +9,34 @@ class QuizResult extends StatelessWidget {
   final List<Question> shuffledQuestions;
   final List<String> answerOptions;
   final int selectedOptionIndex;
-  final List<Question> questions;
-  final Map<int, QuizResponse> quizResponses;
 
-  const QuizResult({super.key,
+  QuizResult({
     required this.correctAnswers,
     required this.incorrectAnswers,
     required this.totalQuestions,
     required this.shuffledQuestions,
     required this.answerOptions,
-    required this.selectedOptionIndex, required Question currentQuestion,
-    required this.questions,
-    required this.quizResponses,
+    required this.selectedOptionIndex,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Risultato del Quiz'),
+        title: Text('Risultato del Quiz'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
+            Text(
               'Risultati del Quiz',
               style: TextStyle(
                 fontSize: 24.0,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 20.0),
+            SizedBox(height: 20.0),
             Text('Domande corrette: $correctAnswers'),
             Text('Domande sbagliate: $incorrectAnswers'),
 
@@ -51,11 +45,11 @@ class QuizResult extends StatelessWidget {
                 // Naviga alla schermata dei risultati
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                      builder: (BuildContext context) => const QuizScreen()
+                      builder: (BuildContext context) => QuizScreen()
                   ),
                 ); // Torna alla schermata del quiz
               },
-              child: const Text('Ritenta il Quiz'),
+              child: Text('Ritenta il Quiz'),
             ),
           ],
         ),
