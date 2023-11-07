@@ -6,7 +6,10 @@ class StartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Esame sicurezza aziendale'),
+        title: Text(
+            'Esame sicurezza aziendale',
+            textAlign: TextAlign.center,
+        ),
       ),
       body: Center(
         child: Column(
@@ -20,6 +23,7 @@ class StartScreen extends StatelessWidget {
                 fontSize: 18.0,
               ),
               textAlign: TextAlign.center,
+
             ),
 
             SizedBox(height: 20.0),

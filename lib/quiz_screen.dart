@@ -180,7 +180,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 ),
               ],
             ),
-      )
+          )
           : null, // Il pulsante appare solo quando hai risposto a tutte le domande
     );
   }

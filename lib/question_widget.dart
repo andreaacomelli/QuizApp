@@ -20,39 +20,55 @@ class QuestionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(16),
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.blue, width: 2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: <Widget>[
-          Text(
-            questionText,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    return Column(
+      children: <Widget>[
+        Container(
+          margin: EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.blue, width: 2),
+            borderRadius: BorderRadius.circular(12),
           ),
-          SizedBox(height: 16),
-          Column(
-            children: List.generate(answerOptions.length, (index) {
-              return Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: RadioListTile(
-                    title: Text(
-                      answerOptions[index],
-                      softWrap: true,),
-                    value: index,
-                    groupValue: selectedOptionIndex,
-                    onChanged: (int? value) {
-                      onAnswerSelected(answerOptions[value!]);
-                    },
-                  )
-              );
-            }),
+          child: Column(
+            children: <Widget>[
+              Text(
+                questionText,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+              Column(
+                children: List.generate(answerOptions.length, (index) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: RadioListTile(
+                      title: Text(
+                        answerOptions[index],
+                        softWrap: true,
+                      ),
+                      value: index,
+                      groupValue: selectedOptionIndex,
+                      onChanged: (int? value) {
+                        onAnswerSelected(answerOptions[value!]);
+                      },
+                    ),
+                  );
+                }),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        SizedBox(height: 16),
+        Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              'Fai swipe verso destra e sinistra per navigare tra le domande',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
