@@ -9,6 +9,8 @@ class QuizResult extends StatelessWidget {
   final List<Question> shuffledQuestions;
   final List<String> answerOptions;
   final int selectedOptionIndex;
+  final List<Question> questions;
+  final Map<int, QuizResponse> quizResponses;
 
   QuizResult({
     required this.correctAnswers,
@@ -16,7 +18,9 @@ class QuizResult extends StatelessWidget {
     required this.totalQuestions,
     required this.shuffledQuestions,
     required this.answerOptions,
-    required this.selectedOptionIndex,
+    required this.selectedOptionIndex, required Question currentQuestion,
+    required this.questions,
+    required this.quizResponses,
   });
 
   @override

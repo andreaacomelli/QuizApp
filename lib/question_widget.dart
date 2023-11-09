@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 
-class QuestionWidget extends StatelessWidget {
+class QuestionWidget extends StatefulWidget {
   final String questionText;
-  final String correctAnswer;
   final List<String> answerOptions;
-  final Function(String) onAnswerSelected;
-  final int currentQuestionIndex;
-  final Function() onNextQuestion;
-  final int selectedOptionIndex = -1;
+  final Function(String, int) onAnswerSelected;
+  final Function onNextQuestion;
 
   QuestionWidget({
     required this.questionText,
-    required this.correctAnswer,
     required this.answerOptions,
     required this.onAnswerSelected,
-    required this.currentQuestionIndex,
     required this.onNextQuestion,
   });
+
+  @override
+  _QuestionWidgetState createState() => _QuestionWidgetState();
+}
+
+class _QuestionWidgetState extends State<QuestionWidget> {
+  String? _site;
 
   @override
   Widget build(BuildContext context) {
@@ -32,27 +34,31 @@ class QuestionWidget extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Text(
-                questionText,
+                widget.questionText,
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 16),
               Column(
-                children: List.generate(answerOptions.length, (index) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: RadioListTile(
+                children: <Widget>[
+                  for (int index = 0; index < widget.answerOptions.length; index++)
+                    ListTile(
                       title: Text(
-                        answerOptions[index],
+                        widget.answerOptions[index],
                         softWrap: true,
                       ),
-                      value: index,
-                      groupValue: selectedOptionIndex,
-                      onChanged: (int? value) {
-                        onAnswerSelected(answerOptions[value!]);
-                      },
+                      leading: Radio<String>(
+                        value: widget.answerOptions[index],
+                        groupValue: _site,
+                        onChanged: (String? value) {
+                          widget.onAnswerSelected(value!, index);
+                          setState(() {
+                            _site = value;
+                            _selectedIndex = index;
+                          });
+                        },
+                      ),
                     ),
-                  );
-                }),
+                ],
               ),
             ],
           ),

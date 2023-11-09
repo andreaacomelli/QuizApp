@@ -1,14 +1,15 @@
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter/material.dart';
-import 'question_widget.dart';
-import 'package:csv/csv.dart';
-import 'question_class.dart';
-import 'quiz_result.dart';
 import 'dart:async';
 import 'dart:math';
 
-class QuizScreen extends StatefulWidget {
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/material.dart';
+import 'package:csv/csv.dart';
 
+import 'question_class.dart';
+import 'question_widget.dart';
+import 'quiz_result.dart';
+
+class QuizScreen extends StatefulWidget {
   @override
   _QuizScreenState createState() => _QuizScreenState();
 }
@@ -23,8 +24,109 @@ class _QuizScreenState extends State<QuizScreen> {
   int maxQuestions = 15;
   int answeredQuestions = 0;
   int selectedOptionIndex = -1;
+  int _selectedOptionIndex = -1;
+
+  Map<int, QuizResponse> quizResponses = {};
 
   List<Question> shuffledQuestions = [];
+
+  void onAnswerSelected(String selectedAnswer, int selectedIndex) {
+    final questionData = shuffledQuestions[currentQuestionIndex];
+    checkAnswer(selectedAnswer, questionData.correctAnswer);
+    updateQuizResponses(currentQuestionIndex, selectedAnswer);
+
+    answeredQuestions++;
+    setState(() {
+      _selectedOptionIndex = selectedIndex;
+    });
+
+    onNextQuestion();
+  }
+
+  void checkAnswer(String userAnswer, String correctAnswer) {
+    if (userAnswer == correctAnswer) {
+      correctAnswers++;
+    } else {
+      incorrectAnswers++;
+    }
+  }
+
+  void updateQuizResponses(int questionIndex, String selectedAnswer) {
+    quizResponses[questionIndex] = QuizResponse(
+      questionIndex: questionIndex,
+      selectedAnswer: selectedAnswer,
+    );
+  }
+
+  void onNextQuestion() {
+    int? index = (pageController.page)?.toInt();
+    setState(() {
+      if (index! < (maxQuestions - 1)) {
+        currentQuestionIndex++;
+
+        print("Page Controller: ${(pageController.page)?.toInt()}");
+        print("Current Question Index: ${currentQuestionIndex}");
+        print("Total Question: ${totalQuestions}");
+        print("Correct Answers: ${correctAnswers}");
+        print("Incorrect Answer: ${incorrectAnswers}");
+        print("Max Questions: ${maxQuestions}");
+        print("Answered Questions: ${answeredQuestions}");
+        print("Selected Option Index: ${selectedOptionIndex}");
+        print("_Selected Option Index: ${_selectedOptionIndex}");
+
+        print("Index: ${index}");
+        print("Max questions: ${maxQuestions - 1}");
+
+        print("Index: ${(index).runtimeType}");
+        print("Max questions: ${(maxQuestions - 1).runtimeType}");
+
+        print("Answered Questions: ${answeredQuestions}");
+
+
+
+        // Verifica se l'utente ha già risposto a questa domanda
+        if (quizResponses.containsKey(currentQuestionIndex)) {
+          _selectedOptionIndex = shuffledQuestions[currentQuestionIndex]
+              .answerOptions
+              .indexOf(quizResponses[currentQuestionIndex]!.selectedAnswer);
+        } else {
+          _selectedOptionIndex = -1;
+        }
+
+        pageController.nextPage(
+          duration: Duration(milliseconds: 300),
+          curve: Curves.ease,
+        );
+      } else {
+        if (answeredQuestions != index) {
+          print("Rispondi a tutte le domande");
+          // L'utente deve rispondere a tutte le domande prima di visualizzare il risultato
+          // Puoi aggiungere qui un messaggio o un comportamento desiderato
+        } else {
+          print("Arrivato!!!");
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  QuizResult(
+                    correctAnswers: correctAnswers,
+                    incorrectAnswers: incorrectAnswers,
+                    totalQuestions: totalQuestions,
+                    shuffledQuestions: shuffledQuestions,
+                    selectedOptionIndex: _selectedOptionIndex,
+                    answerOptions:
+                    questions[currentQuestionIndex].answerOptions,
+                    questions: questions,
+                    currentQuestion: questions[currentQuestionIndex],
+                    quizResponses: quizResponses,
+                  ),
+            ),
+          );
+        }
+      }
+    });
+  }
+
+
 
   @override
   void initState() {
@@ -41,15 +143,18 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Future<void> loadQuestions() async {
-    final String csvData = await rootBundle.loadString('assets/domande.csv');
-    final List<List<dynamic>> csvTable = CsvToListConverter().convert(csvData);
+    final String csvData =
+    await rootBundle.loadString('assets/domande.csv');
+    final List<List<dynamic>> csvTable =
+    CsvToListConverter().convert(csvData);
     final List<Question> questionList = [];
 
-    for (var i = 1; i < csvTable.length; i++) { // Inizia da 1 per escludere l'intestazione
+    for (var i = 1; i < csvTable.length; i++) {
       final questionData = csvTable[i];
       final questionText = questionData[0] as String;
       final correctAnswer = questionData[1] as String;
-      final answerOptions = List<String>.from(questionData.sublist(2));
+      final answerOptions =
+      List<String>.from(questionData.sublist(2));
 
       answerOptions.shuffle(Random());
 
@@ -61,56 +166,11 @@ class _QuizScreenState extends State<QuizScreen> {
       questionList.add(question);
     }
 
-    questionList.shuffle(Random()); // Mescola ordine domande
-
+    questionList.shuffle(Random());
     setState(() {
       questions = questionList;
       totalQuestions = questions.length;
     });
-  }
-
-  void checkAnswer(String userAnswer, String correctAnswer) {
-    if (userAnswer == correctAnswer) {
-      correctAnswers++;
-    } else {
-      incorrectAnswers++;
-    }
-    onNextQuestion();
-  }
-
-  void onNextQuestion() {
-    setState(() {
-      if (answeredQuestions < 15) {
-        // print(selectedOptionIndex);
-        if (currentQuestionIndex < totalQuestions - 1) {
-          currentQuestionIndex++;
-          pageController.nextPage(duration: Duration(milliseconds: 300), curve: Curves.ease);// Passa alla prossima domanda
-        } else {
-          if(answeredQuestions == 15){
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (BuildContext context) => QuizResult(
-                    correctAnswers: correctAnswers,
-                    incorrectAnswers: incorrectAnswers,
-                    totalQuestions: totalQuestions,
-                    shuffledQuestions: [],
-                    answerOptions: [],
-                    selectedOptionIndex: selectedOptionIndex),
-              ),
-            );
-          }
-        }
-        answeredQuestions++; // Incrementa il numero di domande a cui hai risposto
-      }
-    });
-  }
-
-  void onAnswerSelected(String selectedAnswer) {
-    final questionData = shuffledQuestions[currentQuestionIndex];
-    checkAnswer(selectedAnswer, questionData.correctAnswer);
-    answeredQuestions++;
-
-    onNextQuestion();
   }
 
   @override
@@ -123,7 +183,7 @@ class _QuizScreenState extends State<QuizScreen> {
         controller: pageController,
         itemCount: totalQuestions,
         itemBuilder: (context, index) {
-          if (index >= 15) {
+          if (index >= maxQuestions) {
             return SizedBox.shrink();
           }
           final questionData = questions[index];
@@ -132,17 +192,16 @@ class _QuizScreenState extends State<QuizScreen> {
           final answerOptions = questionData.answerOptions;
           return QuestionWidget(
             questionText: questionText,
-            correctAnswer: correctAnswer,
             answerOptions: answerOptions,
-            currentQuestionIndex: currentQuestionIndex,
-            onAnswerSelected: (selectedAnswer) {
+            onAnswerSelected: (selectedAnswer, selectedIndex) {
               checkAnswer(selectedAnswer, correctAnswer);
+              setState(() {
+                _selectedOptionIndex = selectedIndex;
+              });
+              onNextQuestion();
             },
             onNextQuestion: () {
-              // Aggiorna l'indice selezionato alla domanda successiva
-              setState(() {
-                onNextQuestion();
-              });
+              onNextQuestion();
             },
           );
         },
@@ -150,38 +209,66 @@ class _QuizScreenState extends State<QuizScreen> {
 
       floatingActionButton: answeredQuestions >= maxQuestions
           ? Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'Hai risposto a tutte le 15 domande',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-
-                SizedBox(height: 20.0),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) => QuizResult(
-                            correctAnswers: correctAnswers,
-                            incorrectAnswers: incorrectAnswers,
-                            totalQuestions: totalQuestions,
-                            shuffledQuestions: [],
-                            answerOptions: [],
-                            selectedOptionIndex: selectedOptionIndex),
-                      ),
-                    );
-                  },
-                  child: Text('Visualzizza il risultato'),
-                ),
-              ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'Hai risposto a tutte le $maxQuestions domande',
+              style: TextStyle(
+                fontSize: 18.0,
+              ),
+              textAlign: TextAlign.center,
             ),
-          )
-          : null, // Il pulsante appare solo quando hai risposto a tutte le domande
+            SizedBox(height: 20.0),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => QuizResult(
+                      correctAnswers: correctAnswers,
+                      incorrectAnswers: incorrectAnswers,
+                      totalQuestions: totalQuestions,
+                      shuffledQuestions: shuffledQuestions,
+                      selectedOptionIndex: _selectedOptionIndex,
+                      answerOptions:
+                      questions[currentQuestionIndex].answerOptions,
+                      questions: questions,
+                      currentQuestion: questions[currentQuestionIndex],
+                      quizResponses: quizResponses,
+                    ),
+                  ),
+                );
+              },
+              child: Text('Visualizza il risultato'),
+            ),
+          ],
+        ),
+      )
+          : null,
+    );
+  }
+}
+
+class QuizResponse {
+  final int questionIndex;
+  final String selectedAnswer;
+
+  QuizResponse({
+    required this.questionIndex,
+    required this.selectedAnswer,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'questionIndex': questionIndex,
+      'selectedAnswer': selectedAnswer,
+    };
+  }
+
+  factory QuizResponse.fromJson(Map<String, dynamic> json) {
+    return QuizResponse(
+      questionIndex: json['questionIndex'],
+      selectedAnswer: json['selectedAnswer'],
     );
   }
 }
