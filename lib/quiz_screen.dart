@@ -5,8 +5,9 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
 
-import 'question_class.dart';
+import 'quiz_response_class.dart';
 import 'question_widget.dart';
+import 'question_class.dart';
 import 'quiz_result.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -83,7 +84,6 @@ class _QuizScreenState extends State<QuizScreen> {
         print("Answered Questions: ${answeredQuestions}");
 
 
-
         // Verifica se l'utente ha già risposto a questa domanda
         if (quizResponses.containsKey(currentQuestionIndex)) {
           _selectedOptionIndex = shuffledQuestions[currentQuestionIndex]
@@ -125,8 +125,6 @@ class _QuizScreenState extends State<QuizScreen> {
       }
     });
   }
-
-
 
   @override
   void initState() {
@@ -209,66 +207,42 @@ class _QuizScreenState extends State<QuizScreen> {
 
       floatingActionButton: answeredQuestions >= maxQuestions
           ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Hai risposto a tutte le $maxQuestions domande',
-              style: TextStyle(
-                fontSize: 18.0,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => QuizResult(
-                      correctAnswers: correctAnswers,
-                      incorrectAnswers: incorrectAnswers,
-                      totalQuestions: totalQuestions,
-                      shuffledQuestions: shuffledQuestions,
-                      selectedOptionIndex: _selectedOptionIndex,
-                      answerOptions:
-                      questions[currentQuestionIndex].answerOptions,
-                      questions: questions,
-                      currentQuestion: questions[currentQuestionIndex],
-                      quizResponses: quizResponses,
-                    ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'Hai risposto a tutte le $maxQuestions domande',
+                  style: TextStyle(
+                    fontSize: 18.0,
                   ),
-                );
-              },
-              child: Text('Visualizza il risultato'),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20.0),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => QuizResult(
+                          correctAnswers: correctAnswers,
+                          incorrectAnswers: incorrectAnswers,
+                          totalQuestions: totalQuestions,
+                          shuffledQuestions: shuffledQuestions,
+                          selectedOptionIndex: _selectedOptionIndex,
+                          answerOptions:
+                          questions[currentQuestionIndex].answerOptions,
+                          questions: questions,
+                          currentQuestion: questions[currentQuestionIndex],
+                          quizResponses: quizResponses,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Text('Visualizza il risultato'),
+                ),
+              ],
             ),
-          ],
-        ),
-      )
-          : null,
-    );
-  }
-}
-
-class QuizResponse {
-  final int questionIndex;
-  final String selectedAnswer;
-
-  QuizResponse({
-    required this.questionIndex,
-    required this.selectedAnswer,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'questionIndex': questionIndex,
-      'selectedAnswer': selectedAnswer,
-    };
-  }
-
-  factory QuizResponse.fromJson(Map<String, dynamic> json) {
-    return QuizResponse(
-      questionIndex: json['questionIndex'],
-      selectedAnswer: json['selectedAnswer'],
+          )
+        : null,
     );
   }
 }

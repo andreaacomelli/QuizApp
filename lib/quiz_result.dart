@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'quiz_response_class.dart';
 import 'question_class.dart';
 import 'quiz_screen.dart';
 

@@ -19,6 +19,7 @@ class QuestionWidget extends StatefulWidget {
 
 class _QuestionWidgetState extends State<QuestionWidget> {
   String? _site;
+  int? _selectedIndex;
 
   @override
   Widget build(BuildContext context) {
