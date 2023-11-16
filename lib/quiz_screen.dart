@@ -33,20 +33,24 @@ class _QuizScreenState extends State<QuizScreen> {
   List<Question> shuffledQuestions = [];
 
   void onAnswerSelected(String selectedAnswer, int selectedIndex) {
-    final questionData = shuffledQuestions[currentQuestionIndex];
-    checkAnswer(selectedAnswer, questionData.correctAnswer);
+    if (currentQuestionIndex < shuffledQuestions.length) {
+      final questionData = shuffledQuestions[currentQuestionIndex];
+      checkAnswer(selectedAnswer, questionData.correctAnswer);
 
-    if (!answeredQuestionsList.any((element) => element.questionIndex == currentQuestionIndex)) {
-      answeredQuestionsList.add(QuizResponse(questionIndex: currentQuestionIndex, selectedAnswer: selectedAnswer));
+      if (!answeredQuestionsList.any((element) => element.questionIndex == currentQuestionIndex)) {
+        answeredQuestionsList.add(QuizResponse(questionIndex: currentQuestionIndex, selectedAnswer: selectedAnswer));
+      }
+
+      answeredQuestions++;
+      setState(() {
+        _selectedOptionIndex = selectedIndex;
+      });
+
+      onNextQuestion();
     }
-
-    answeredQuestions++;
-    setState(() {
-      _selectedOptionIndex = selectedIndex;
-    });
-
-    onNextQuestion();
   }
+
+
 
   void checkAnswer(String userAnswer, String correctAnswer) {
     if (userAnswer == correctAnswer) {
@@ -62,6 +66,9 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void onNextQuestion() {
     int? index = (pageController.page)?.toInt();
+    print(index);
+    print(maxQuestions - 1);
+    print(answeredQuestions);
     setState(() {
       if (index! < (maxQuestions - 1)) {
         currentQuestionIndex++;
@@ -80,10 +87,7 @@ class _QuizScreenState extends State<QuizScreen> {
         );
       } else {
         if (answeredQuestions != index) {
-          // print("Answer all the questions");
-          // print(answeredQuestions);
-          // print(index);
-          // print(answeredQuestionsList);
+
         } else {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
@@ -109,9 +113,11 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   void initState() {
     super.initState();
-    loadQuestions();
-    shuffledQuestions = shuffleQuestions(questions);
+    loadQuestions().then((_) {
+      shuffledQuestions = shuffleQuestions(questions);
+    });
   }
+
 
   List<Question> shuffleQuestions(List<Question> questions) {
     var random = Random();
@@ -138,6 +144,7 @@ class _QuizScreenState extends State<QuizScreen> {
         correctAnswer: correctAnswer,
         answerOptions: answerOptions,
       );
+
       questionList.add(question);
     }
 
@@ -166,6 +173,7 @@ class _QuizScreenState extends State<QuizScreen> {
           final answerOptions = questionData.answerOptions;
 
           return QuestionWidget(
+            currentQuestionIndex: currentQuestionIndex,
             questionText: questionText,
             answerOptions: answerOptions,
             answeredQuestionsList: answeredQuestionsList,

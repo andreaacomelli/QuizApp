@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'quiz_response_class.dart';
 
 class QuestionWidget extends StatefulWidget {
@@ -8,6 +7,7 @@ class QuestionWidget extends StatefulWidget {
   final List<QuizResponse> answeredQuestionsList;
   final Function(String, int) onAnswerSelected;
   final VoidCallback onNextQuestion;
+  final int currentQuestionIndex;
 
   const QuestionWidget({super.key,
     required this.questionText,
@@ -15,6 +15,7 @@ class QuestionWidget extends StatefulWidget {
     required this.answeredQuestionsList,
     required this.onAnswerSelected,
     required this.onNextQuestion,
+    required this.currentQuestionIndex,
   });
 
   @override
@@ -22,18 +23,26 @@ class QuestionWidget extends StatefulWidget {
 }
 
 class _QuestionWidgetState extends State<QuestionWidget> {
-  final Map<int, int> _selectedAnswers = {};
+  int? _selectedAnswerIndex;
 
   @override
   void initState() {
     super.initState();
-    _loadSelectedAnswers();
+    _loadSelectedAnswer();
   }
 
-  void _loadSelectedAnswers() {
-    for (var response in widget.answeredQuestionsList) {
-      _selectedAnswers[response.questionIndex] = widget.answerOptions.indexOf(response.selectedAnswer);
-    }
+  void _loadSelectedAnswer() {
+    setState(() {
+      final response = widget.answeredQuestionsList.firstWhere(
+            (element) => element.questionIndex == widget.currentQuestionIndex,
+        orElse: () => QuizResponse(questionIndex: -1, selectedAnswer: ""),
+      );
+      if (response.questionIndex == widget.currentQuestionIndex) {
+        _selectedAnswerIndex = widget.answerOptions.indexOf(response.selectedAnswer);
+      } else {
+        _selectedAnswerIndex = -1;
+      }
+    });
   }
 
   @override
@@ -60,7 +69,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
                 itemCount: widget.answerOptions.length,
                 itemBuilder: (context, index) {
                   final answer = widget.answerOptions[index];
-                  bool isSelected = _selectedAnswers.containsKey(index);
+                  bool isSelected = _selectedAnswerIndex == index;
 
                   return RadioListTile<int>(
                     title: Text(
@@ -70,10 +79,10 @@ class _QuestionWidgetState extends State<QuestionWidget> {
                       ),
                     ),
                     value: index,
-                    groupValue: isSelected ? _selectedAnswers[index] : null,
+                    groupValue: isSelected ? _selectedAnswerIndex : null,
                     onChanged: (value) {
                       setState(() {
-                        _selectedAnswers[index] = value!;
+                        _selectedAnswerIndex = value;
                         widget.onAnswerSelected(answer, index);
                       });
                     },
