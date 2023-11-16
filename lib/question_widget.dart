@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'quiz_response_class.dart';
 
 class QuestionWidget extends StatefulWidget {
@@ -87,7 +88,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              'Swipe right and left to navigate questions',
+              'Fai swipe verso destra e sinistra per navigare tra le domande',
               style: TextStyle(fontSize: 12, color: Colors.grey),
               textAlign: TextAlign.center,
             ),

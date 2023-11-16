@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:math';
+
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
+
 import 'quiz_response_class.dart';
 import 'question_widget.dart';
 import 'question_class.dart';
@@ -172,40 +174,40 @@ class _QuizScreenState extends State<QuizScreen> {
       ),
       floatingActionButton: answeredQuestions >= maxQuestions
           ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Answered all $maxQuestions questions',
-              style: TextStyle(
-                fontSize: 18.0,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => QuizResult(
-                      correctAnswers: correctAnswers,
-                      incorrectAnswers: incorrectAnswers,
-                      totalQuestions: totalQuestions,
-                      shuffledQuestions: shuffledQuestions,
-                      selectedOptionIndex: _selectedOptionIndex,
-                      answerOptions: questions[currentQuestionIndex].answerOptions,
-                      questions: questions,
-                      currentQuestion: questions[currentQuestionIndex],
-                      quizResponses: quizResponses,
-                    ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'Rispondi a tutte le $maxQuestions domande',
+                  style: TextStyle(
+                    fontSize: 18.0,
                   ),
-                );
-              },
-              child: Text('Show Results'),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20.0),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => QuizResult(
+                          correctAnswers: correctAnswers,
+                          incorrectAnswers: incorrectAnswers,
+                          totalQuestions: totalQuestions,
+                          shuffledQuestions: shuffledQuestions,
+                          selectedOptionIndex: _selectedOptionIndex,
+                          answerOptions: questions[currentQuestionIndex].answerOptions,
+                          questions: questions,
+                          currentQuestion: questions[currentQuestionIndex],
+                          quizResponses: quizResponses,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Text('Visualizza i risultati'),
+                ),
+              ],
             ),
-          ],
-        ),
-      )
+          )
           : null,
     );
   }
