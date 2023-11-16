@@ -14,7 +14,7 @@ class QuizResult extends StatelessWidget {
   final List<Question> questions;
   final Map<int, QuizResponse> quizResponses;
 
-  QuizResult({
+  const QuizResult({super.key,
     required this.correctAnswers,
     required this.incorrectAnswers,
     required this.totalQuestions,
@@ -29,20 +29,20 @@ class QuizResult extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Risultato del Quiz'),
+        title: const Text('Risultato del Quiz'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               'Risultati del Quiz',
               style: TextStyle(
                 fontSize: 24.0,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 20.0),
+            const SizedBox(height: 20.0),
             Text('Domande corrette: $correctAnswers'),
             Text('Domande sbagliate: $incorrectAnswers'),
 
@@ -51,11 +51,11 @@ class QuizResult extends StatelessWidget {
                 // Naviga alla schermata dei risultati
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                      builder: (BuildContext context) => QuizScreen()
+                      builder: (BuildContext context) => const QuizScreen()
                   ),
                 ); // Torna alla schermata del quiz
               },
-              child: Text('Ritenta il Quiz'),
+              child: const Text('Ritenta il Quiz'),
             ),
           ],
         ),

@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'quiz_screen.dart';
 
 class StartScreen extends StatelessWidget {
+  const StartScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
             'Esame sicurezza aziendale',
             textAlign: TextAlign.center,
         ),
@@ -16,7 +18,7 @@ class StartScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
+            const Text(
               'Questa applicazione ti permetterà di esercitarti all\'esame antincendio\n'
                   '\nPreparati per l\'esame rispondendo alle 15 domande che seguiranno\n'
                   '\nPer superarlo, potrai fare al massimo 5 errori',
@@ -27,16 +29,16 @@ class StartScreen extends StatelessWidget {
 
             ),
 
-            SizedBox(height: 20.0),
+            const SizedBox(height: 20.0),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                    builder: (BuildContext context) => QuizScreen(),
+                    builder: (BuildContext context) => const QuizScreen(),
                   ),
                 );
               },
-              child: Text('Inizia il Quiz'),
+              child: const Text('Inizia il Quiz'),
             ),
           ],
         ),

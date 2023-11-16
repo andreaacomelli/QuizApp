@@ -11,6 +11,8 @@ import 'question_class.dart';
 import 'quiz_result.dart';
 
 class QuizScreen extends StatefulWidget {
+  const QuizScreen({super.key});
+
   @override
   _QuizScreenState createState() => _QuizScreenState();
 }
@@ -73,7 +75,7 @@ class _QuizScreenState extends State<QuizScreen> {
         }
 
         pageController.nextPage(
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.ease,
         );
       } else {
@@ -120,7 +122,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Future<void> loadQuestions() async {
     final String csvData = await rootBundle.loadString('assets/domande.csv');
-    final List<List<dynamic>> csvTable = CsvToListConverter().convert(csvData);
+    final List<List<dynamic>> csvTable = const CsvToListConverter().convert(csvData);
     final List<Question> questionList = [];
 
     for (var i = 1; i < csvTable.length; i++) {
@@ -150,14 +152,14 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Esame sicurezza Aziendale'),
+        title: const Text('Esame sicurezza Aziendale'),
       ),
       body: PageView.builder(
         controller: pageController,
         itemCount: totalQuestions,
         itemBuilder: (context, index) {
           if (index >= maxQuestions) {
-            return SizedBox.shrink();
+            return const SizedBox.shrink();
           }
           final questionData = questions[index];
           final questionText = questionData.questionText;
@@ -179,12 +181,12 @@ class _QuizScreenState extends State<QuizScreen> {
               children: <Widget>[
                 Text(
                   'Rispondi a tutte le $maxQuestions domande',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18.0,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 20.0),
+                const SizedBox(height: 20.0),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).push(
@@ -203,7 +205,7 @@ class _QuizScreenState extends State<QuizScreen> {
                       ),
                     );
                   },
-                  child: Text('Visualizza i risultati'),
+                  child: const Text('Visualizza i risultati'),
                 ),
               ],
             ),

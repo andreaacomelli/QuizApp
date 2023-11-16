@@ -9,7 +9,7 @@ class QuestionWidget extends StatefulWidget {
   final Function(String, int) onAnswerSelected;
   final VoidCallback onNextQuestion;
 
-  QuestionWidget({
+  const QuestionWidget({super.key,
     required this.questionText,
     required this.answerOptions,
     required this.answeredQuestionsList,
@@ -22,7 +22,7 @@ class QuestionWidget extends StatefulWidget {
 }
 
 class _QuestionWidgetState extends State<QuestionWidget> {
-  Map<int, int> _selectedAnswers = {};
+  final Map<int, int> _selectedAnswers = {};
 
   @override
   void initState() {
@@ -41,8 +41,8 @@ class _QuestionWidgetState extends State<QuestionWidget> {
     return Column(
       children: <Widget>[
         Container(
-          margin: EdgeInsets.all(16),
-          padding: EdgeInsets.all(16),
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             border: Border.all(color: Colors.blue, width: 2),
             borderRadius: BorderRadius.circular(12),
@@ -52,9 +52,9 @@ class _QuestionWidgetState extends State<QuestionWidget> {
             children: <Widget>[
               Text(
                 widget.questionText,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               ListView.builder(
                 shrinkWrap: true,
                 itemCount: widget.answerOptions.length,
@@ -83,8 +83,8 @@ class _QuestionWidgetState extends State<QuestionWidget> {
             ],
           ),
         ),
-        SizedBox(height: 16),
-        Center(
+        const SizedBox(height: 16),
+        const Center(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
