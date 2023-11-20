@@ -14,7 +14,7 @@ class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
 
   @override
-  _QuizScreenState createState() => _QuizScreenState();
+  State<QuizScreen> createState() => _QuizScreenState();
 }
 
 class _QuizScreenState extends State<QuizScreen> {
@@ -50,8 +50,6 @@ class _QuizScreenState extends State<QuizScreen> {
     }
   }
 
-
-
   void checkAnswer(String userAnswer, String correctAnswer) {
     if (userAnswer == correctAnswer) {
       correctAnswers++;
@@ -67,7 +65,6 @@ class _QuizScreenState extends State<QuizScreen> {
   void onNextQuestion() {
     int? index = (pageController.page)?.toInt();
     print(index);
-    print(maxQuestions - 1);
     print(answeredQuestions);
     setState(() {
       if (index! < (maxQuestions - 1)) {
@@ -88,7 +85,7 @@ class _QuizScreenState extends State<QuizScreen> {
       } else {
         if (answeredQuestions != index) {
 
-        } else {
+        } else if(answeredQuestionsList.length == maxQuestions){
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (BuildContext context) =>
@@ -117,7 +114,6 @@ class _QuizScreenState extends State<QuizScreen> {
       shuffledQuestions = shuffleQuestions(questions);
     });
   }
-
 
   List<Question> shuffleQuestions(List<Question> questions) {
     var random = Random();

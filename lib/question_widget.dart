@@ -19,7 +19,7 @@ class QuestionWidget extends StatefulWidget {
   });
 
   @override
-  _QuestionWidgetState createState() => _QuestionWidgetState();
+  State<QuestionWidget> createState() => _QuestionWidgetState();
 }
 
 class _QuestionWidgetState extends State<QuestionWidget> {
@@ -32,17 +32,19 @@ class _QuestionWidgetState extends State<QuestionWidget> {
   }
 
   void _loadSelectedAnswer() {
-    setState(() {
-      final response = widget.answeredQuestionsList.firstWhere(
-            (element) => element.questionIndex == widget.currentQuestionIndex,
-        orElse: () => QuizResponse(questionIndex: -1, selectedAnswer: ""),
-      );
-      if (response.questionIndex == widget.currentQuestionIndex) {
+    final response = widget.answeredQuestionsList.firstWhere(
+          (element) => element.questionIndex == widget.currentQuestionIndex,
+      orElse: () => QuizResponse(questionIndex: -1, selectedAnswer: ""),
+    );
+    if (response.questionIndex == widget.currentQuestionIndex) {
+      setState(() {
         _selectedAnswerIndex = widget.answerOptions.indexOf(response.selectedAnswer);
-      } else {
+      });
+    } else {
+      setState(() {
         _selectedAnswerIndex = -1;
-      }
-    });
+      });
+    }
   }
 
   @override
@@ -79,7 +81,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
                       ),
                     ),
                     value: index,
-                    groupValue: isSelected ? _selectedAnswerIndex : null,
+                    groupValue: _selectedAnswerIndex,
                     onChanged: (value) {
                       setState(() {
                         _selectedAnswerIndex = value;
