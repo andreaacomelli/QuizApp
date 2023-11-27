@@ -52,14 +52,15 @@ class _QuestionWidgetState extends State<QuestionWidget> {
     return Column(
       children: <Widget>[
         Container(
-          margin: const EdgeInsets.all(16),
-          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(12),
+
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.blue, width: 2),
+            border: Border.all(color: Colors.deepPurpleAccent, width: 2),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Text(
                 widget.questionText,
@@ -72,35 +73,48 @@ class _QuestionWidgetState extends State<QuestionWidget> {
                 itemBuilder: (context, index) {
                   final answer = widget.answerOptions[index];
                   bool isSelected = _selectedAnswerIndex == index;
-
-                  return RadioListTile<int>(
-                    title: Text(
-                      answer,
-                      style: TextStyle(
-                        color: isSelected ? Colors.blue : Colors.black,
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: RadioListTile<int>(
+                      fillColor:
+                      MaterialStateProperty.resolveWith<Color>(
+                        (Set<MaterialState> states) {
+                          return(isSelected ? Colors.deepPurpleAccent : Colors.black);
+                        }),
+                      title: Text(
+                        answer,
+                        style: const TextStyle(
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
-                    value: index,
-                    groupValue: _selectedAnswerIndex,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedAnswerIndex = value;
-                        widget.onAnswerSelected(answer, index);
-                      });
-                    },
+                      value: index,
+                      groupValue: _selectedAnswerIndex,
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedAnswerIndex = value;
+                          widget.onAnswerSelected(answer, index);
+                        });
+                      },
+                    )
                   );
                 },
               ),
+              const SizedBox(height: 10),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 30),
         const Center(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              'Fai swipe verso destra e sinistra per navigare tra le domande',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+              'Fai swipe verso destra e sinistra\n'
+                  'per navigare tra le domande',
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurpleAccent,
+              ),
               textAlign: TextAlign.center,
             ),
           ),

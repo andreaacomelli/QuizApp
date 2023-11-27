@@ -32,23 +32,37 @@ class _QuizScreenState extends State<QuizScreen> {
   Map<int, QuizResponse> quizResponses = {};
   List<Question> shuffledQuestions = [];
 
+  Map<int, String> questionAnswers = {};
+
   void onAnswerSelected(String selectedAnswer, int selectedIndex) {
     if (currentQuestionIndex < shuffledQuestions.length) {
-      final questionData = shuffledQuestions[currentQuestionIndex];
-      checkAnswer(selectedAnswer, questionData.correctAnswer);
+      final currentQuestionIndex = pageController.page?.toInt() ?? 0;
 
-      if (!answeredQuestionsList.any((element) => element.questionIndex == currentQuestionIndex)) {
+      checkAnswer(selectedAnswer, shuffledQuestions[currentQuestionIndex].correctAnswer);
+
+      if (questionAnswers.containsKey(currentQuestionIndex)) {
+        if (questionAnswers[currentQuestionIndex] != selectedAnswer) {
+          questionAnswers[currentQuestionIndex] = selectedAnswer;
+          answeredQuestionsList.removeWhere((response) => response.questionIndex == currentQuestionIndex);
+          answeredQuestionsList.add(QuizResponse(questionIndex: currentQuestionIndex, selectedAnswer: selectedAnswer));
+        }
+      } else {
+        questionAnswers[currentQuestionIndex] = selectedAnswer;
         answeredQuestionsList.add(QuizResponse(questionIndex: currentQuestionIndex, selectedAnswer: selectedAnswer));
       }
 
-      answeredQuestions++;
       setState(() {
         _selectedOptionIndex = selectedIndex;
       });
-
       onNextQuestion();
     }
   }
+
+
+
+
+
+
 
   void checkAnswer(String userAnswer, String correctAnswer) {
     if (userAnswer == correctAnswer) {
@@ -58,14 +72,22 @@ class _QuizScreenState extends State<QuizScreen> {
     }
   }
 
+  void collectAnswers() {
+
+  }
+
   void updateQuizResponses(int questionIndex, String selectedAnswer) {
     quizResponses[questionIndex] = QuizResponse(questionIndex: questionIndex, selectedAnswer: selectedAnswer);
   }
 
   void onNextQuestion() {
     int? index = (pageController.page)?.toInt();
-    print(index);
-    print(answeredQuestions);
+    print("Index: ${index}");
+    print("answered questions: ${answeredQuestions}");
+
+    print("answeredQuestionsList: ${answeredQuestionsList.length}");
+    print("max questions: ${maxQuestions}");
+
     setState(() {
       if (index! < (maxQuestions - 1)) {
         currentQuestionIndex++;
@@ -83,7 +105,8 @@ class _QuizScreenState extends State<QuizScreen> {
           curve: Curves.ease,
         );
       } else {
-        if (answeredQuestions != index) {
+        if (index <= 14) {
+
 
         } else if(answeredQuestionsList.length == maxQuestions){
           Navigator.of(context).pushReplacement(
@@ -131,7 +154,7 @@ class _QuizScreenState extends State<QuizScreen> {
       final questionData = csvTable[i];
       final questionText = questionData[0] as String;
       final correctAnswer = questionData[1] as String;
-      final answerOptions = List<String>.from(questionData.sublist(2));
+      final List<String> answerOptions = List<String>.from(questionData.sublist(2));
 
       answerOptions.shuffle(Random());
 
@@ -151,11 +174,21 @@ class _QuizScreenState extends State<QuizScreen> {
     });
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Esame sicurezza Aziendale'),
+        title: const Text('Esame sicurezza Aziendale',
+          textAlign: TextAlign.center,
+
+          style: TextStyle(
+          fontSize: 18.0,
+          fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.deepPurpleAccent,
       ),
       body: PageView.builder(
         controller: pageController,
@@ -209,6 +242,15 @@ class _QuizScreenState extends State<QuizScreen> {
                       ),
                     );
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurpleAccent,
+                    foregroundColor: Colors.white,
+                    shadowColor: Colors.deepPurple,
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(32.0)
+                    ),
+                  ),
                   child: const Text('Visualizza i risultati'),
                 ),
               ],
