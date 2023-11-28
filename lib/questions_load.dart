@@ -25,7 +25,6 @@ Future<List<Question>> loadQuestions() async {
       correctAnswer: correctAnswer,
       answerOptions: answerOptions,
     );
-
     questionList.add(question);
   }
 

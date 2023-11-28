@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'start_screen.dart';
 
-void main() => runApp(const QuizApp());
+void main() {
+  runApp(const QuizApp());
+}
 
 class QuizApp extends StatelessWidget {
-  const QuizApp({super.key});
+  const QuizApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -15,53 +15,55 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  PageController pageController = PageController(initialPage: 0);
-  List<Question> questions = [];
-  int currentQuestionIndex = 0;
-  int totalQuestions = 0;
-  int correctAnswers = 0;
-  int incorrectAnswers = 0;
-  int maxQuestions = 15;
-  int answeredQuestions = 0;
-  int selectedOptionIndex = -1;
+  final PageController _pageController = PageController(initialPage: 0);
+  final List<QuizResponse> _answeredQuestionsList = [];
+  final Map<int, QuizResponse> _quizResponses = {};
+  final Map<int, String> _questionAnswers = {};
+  List<Question> _shuffledQuestions = [];
+  List<Question> _questions = [];
+  int _currentQuestionIndex = 0;
+  int _totalQuestions = 0;
+  int _correctAnswers = 0;
+  int _incorrectAnswers = 0;
+  final int _maxQuestions = 15;
+  final int _answeredQuestions = 0;
   int _selectedOptionIndex = -1;
-  List<QuizResponse> answeredQuestionsList = [];
-  Map<int, QuizResponse> quizResponses = {};
-  List<Question> shuffledQuestions = [];
-
-  Map<int, String> questionAnswers = {};
 
   @override
   void initState() {
     super.initState();
-    loadQuestions().then((questionList) {
-      shuffledQuestions = shuffleQuestions(questionList);
+    _loadQuestions().then((questionList) {
+      _shuffledQuestions = _shuffleQuestions(questionList);
       setState(() {
-        questions = questionList;
-        totalQuestions = questions.length;
+        _questions = questionList;
+        _totalQuestions = _questions.length;
       });
     });
   }
 
-  void onAnswerSelected(String selectedAnswer, int selectedIndex) {
-    if (currentQuestionIndex < shuffledQuestions.length) {
-      final currentQuestionIndex = pageController.page?.toInt() ?? 0;
+  Future<List<Question>> _loadQuestions() async {
+    return await loadQuestions();
+  }
 
-      checkAnswer(selectedAnswer,
-          shuffledQuestions[currentQuestionIndex].correctAnswer);
+  void _onAnswerSelected(String selectedAnswer, int selectedIndex) {
+    if (_currentQuestionIndex < _shuffledQuestions.length) {
+      final currentQuestionIndex = _pageController.page?.toInt() ?? 0;
 
-      if (questionAnswers.containsKey(currentQuestionIndex)) {
-        if (questionAnswers[currentQuestionIndex] != selectedAnswer) {
-          questionAnswers[currentQuestionIndex] = selectedAnswer;
-          answeredQuestionsList.removeWhere(
+      _checkAnswer(selectedAnswer,
+          _shuffledQuestions[currentQuestionIndex].correctAnswer);
+
+      if (_questionAnswers.containsKey(currentQuestionIndex)) {
+        if (_questionAnswers[currentQuestionIndex] != selectedAnswer) {
+          _questionAnswers[currentQuestionIndex] = selectedAnswer;
+          _answeredQuestionsList.removeWhere(
               (response) => response.questionIndex == currentQuestionIndex);
-          answeredQuestionsList.add(QuizResponse(
+          _answeredQuestionsList.add(QuizResponse(
               questionIndex: currentQuestionIndex,
               selectedAnswer: selectedAnswer));
         }
       } else {
-        questionAnswers[currentQuestionIndex] = selectedAnswer;
-        answeredQuestionsList.add(QuizResponse(
+        _questionAnswers[currentQuestionIndex] = selectedAnswer;
+        _answeredQuestionsList.add(QuizResponse(
             questionIndex: currentQuestionIndex,
             selectedAnswer: selectedAnswer));
       }
@@ -69,64 +71,62 @@ class _QuizScreenState extends State<QuizScreen> {
       setState(() {
         _selectedOptionIndex = selectedIndex;
       });
-      onNextQuestion();
+      _onNextQuestion();
     }
   }
 
-  void checkAnswer(String userAnswer, String correctAnswer) {
+  void _checkAnswer(String userAnswer, String correctAnswer) {
     if (userAnswer == correctAnswer) {
-      correctAnswers++;
+      _correctAnswers++;
     } else {
-      incorrectAnswers++;
+      _incorrectAnswers++;
     }
   }
 
-  void collectAnswers() {}
-
-  void updateQuizResponses(int questionIndex, String selectedAnswer) {
-    quizResponses[questionIndex] = QuizResponse(
+  void _updateQuizResponses(int questionIndex, String selectedAnswer) {
+    _quizResponses[questionIndex] = QuizResponse(
         questionIndex: questionIndex, selectedAnswer: selectedAnswer);
   }
 
-  void onNextQuestion() {
-    int? index = (pageController.page)?.toInt();
+  void _onNextQuestion() {
+    int? index = (_pageController.page)?.toInt();
     print("Index: ${index}");
-    print("answered questions: ${answeredQuestions}");
+    print("answered questions: ${_answeredQuestions}");
 
-    print("answeredQuestionsList: ${answeredQuestionsList.length}");
-    print("max questions: ${maxQuestions}");
+    print("answeredQuestionsList: ${_answeredQuestionsList.length}");
+    print("max questions: ${_maxQuestions}");
 
     setState(() {
-      if (index! < (maxQuestions - 1)) {
-        currentQuestionIndex++;
+      if (index! < (_maxQuestions - 1)) {
+        _currentQuestionIndex++;
 
-        if (quizResponses.containsKey(currentQuestionIndex)) {
-          _selectedOptionIndex = shuffledQuestions[currentQuestionIndex]
+        if (_quizResponses.containsKey(_currentQuestionIndex)) {
+          _selectedOptionIndex = _shuffledQuestions[_currentQuestionIndex]
               .answerOptions
-              .indexOf(quizResponses[currentQuestionIndex]!.selectedAnswer);
+              .indexOf(_quizResponses[_currentQuestionIndex]!.selectedAnswer);
         } else {
           _selectedOptionIndex = -1;
         }
 
-        pageController.nextPage(
+        _pageController.nextPage(
           duration: const Duration(milliseconds: 300),
           curve: Curves.ease,
         );
       } else {
         if (index <= 14) {
-        } else if (answeredQuestionsList.length == maxQuestions) {
+        } else if (_answeredQuestionsList.length == _maxQuestions) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (BuildContext context) => QuizResult(
-                correctAnswers: correctAnswers,
-                incorrectAnswers: incorrectAnswers,
-                totalQuestions: totalQuestions,
-                shuffledQuestions: shuffledQuestions,
+                correctAnswers: _correctAnswers,
+                incorrectAnswers: _incorrectAnswers,
+                totalQuestions: _totalQuestions,
+                shuffledQuestions: _shuffledQuestions,
                 selectedOptionIndex: _selectedOptionIndex,
-                answerOptions: questions[currentQuestionIndex].answerOptions,
-                questions: questions,
-                currentQuestion: questions[currentQuestionIndex],
-                quizResponses: quizResponses,
+                answerOptions: _questions[_currentQuestionIndex].answerOptions,
+                questions: _questions,
+                currentQuestion: _questions[_currentQuestionIndex],
+                quizResponses: _quizResponses,
               ),
             ),
           );
@@ -135,7 +135,7 @@ class _QuizScreenState extends State<QuizScreen> {
     });
   }
 
-  List<Question> shuffleQuestions(List<Question> questions) {
+  List<Question> _shuffleQuestions(List<Question> questions) {
     var random = Random();
     List<Question> shuffledQuestions = List<Question>.from(questions);
     shuffledQuestions.shuffle(random);
@@ -157,33 +157,33 @@ class _QuizScreenState extends State<QuizScreen> {
         backgroundColor: Colors.deepPurpleAccent,
       ),
       body: PageView.builder(
-        controller: pageController,
-        itemCount: totalQuestions,
+        controller: _pageController,
+        itemCount: _totalQuestions,
         itemBuilder: (context, index) {
-          if (index >= maxQuestions) {
+          if (index >= _maxQuestions) {
             return const SizedBox.shrink();
           }
-          final questionData = questions[index];
+          final questionData = _questions[index];
           final questionText = questionData.questionText;
           final answerOptions = questionData.answerOptions;
 
           return QuestionWidget(
-            currentQuestionIndex: currentQuestionIndex,
+            currentQuestionIndex: _currentQuestionIndex,
             questionText: questionText,
             answerOptions: answerOptions,
-            answeredQuestionsList: answeredQuestionsList,
-            onAnswerSelected: onAnswerSelected,
-            onNextQuestion: onNextQuestion,
+            answeredQuestionsList: _answeredQuestionsList,
+            onAnswerSelected: _onAnswerSelected,
+            onNextQuestion: _onNextQuestion,
           );
         },
       ),
-      floatingActionButton: answeredQuestions >= maxQuestions
+      floatingActionButton: _answeredQuestions >= _maxQuestions
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    'Rispondi a tutte le $maxQuestions domande',
+                    'Rispondi a tutte le $_maxQuestions domande',
                     style: const TextStyle(
                       fontSize: 18.0,
                     ),
@@ -195,16 +195,16 @@ class _QuizScreenState extends State<QuizScreen> {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (BuildContext context) => QuizResult(
-                            correctAnswers: correctAnswers,
-                            incorrectAnswers: incorrectAnswers,
-                            totalQuestions: totalQuestions,
-                            shuffledQuestions: shuffledQuestions,
+                            correctAnswers: _correctAnswers,
+                            incorrectAnswers: _incorrectAnswers,
+                            totalQuestions: _totalQuestions,
+                            shuffledQuestions: _shuffledQuestions,
                             selectedOptionIndex: _selectedOptionIndex,
                             answerOptions:
-                                questions[currentQuestionIndex].answerOptions,
-                            questions: questions,
-                            currentQuestion: questions[currentQuestionIndex],
-                            quizResponses: quizResponses,
+                                _questions[_currentQuestionIndex].answerOptions,
+                            questions: _questions,
+                            currentQuestion: _questions[_currentQuestionIndex],
+                            quizResponses: _quizResponses,
                           ),
                         ),
                       );
