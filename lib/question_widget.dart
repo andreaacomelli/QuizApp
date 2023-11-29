@@ -52,9 +52,8 @@ class _QuestionWidgetState extends State<QuestionWidget> {
     return Column(
       children: <Widget>[
         Container(
-          margin: const EdgeInsets.all(12),
-          padding: const EdgeInsets.all(12),
-
+          margin: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(5),
           decoration: BoxDecoration(
             border: Border.all(color: Colors.deepPurpleAccent, width: 2),
             borderRadius: BorderRadius.circular(12),
@@ -64,7 +63,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
             children: <Widget>[
               Text(
                 widget.questionText,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontFamily: 'Poppins',fontSize: 20, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 16),
               ListView.builder(
@@ -85,6 +84,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
                         answer,
                         style: const TextStyle(
                           color: Colors.black,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                       value: index,
@@ -111,8 +111,9 @@ class _QuestionWidgetState extends State<QuestionWidget> {
               'Fai swipe verso destra e sinistra\n'
                   'per navigare tra le domande',
               style: TextStyle(
+                fontFamily: 'Poppins',
                   fontSize: 12,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                   color: Colors.deepPurpleAccent,
               ),
               textAlign: TextAlign.center,

@@ -13,8 +13,9 @@ class StartScreen extends StatelessWidget {
             'Esame sicurezza aziendale',
             textAlign: TextAlign.center,
             style: TextStyle(
+              fontFamily: 'Poppins',
               fontSize: 18.0,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w700,
             ),
         ),
         backgroundColor: Colors.deepPurpleAccent,
@@ -54,7 +55,14 @@ class StartScreen extends StatelessWidget {
                 ),
                 minimumSize: const Size(150, 60),
               ),
-              child: const Text('Inizia il Quiz'),
+              child: const Text(
+                'Inizia il Quiz',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ],
         ),

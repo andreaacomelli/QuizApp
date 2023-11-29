@@ -150,8 +150,9 @@ class _QuizScreenState extends State<QuizScreen> {
           'Esame sicurezza Aziendale',
           textAlign: TextAlign.center,
           style: TextStyle(
+            fontFamily: 'Poppins',
             fontSize: 18.0,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
           ),
         ),
         backgroundColor: Colors.deepPurpleAccent,
@@ -217,7 +218,13 @@ class _QuizScreenState extends State<QuizScreen> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(32.0)),
                     ),
-                    child: const Text('Visualizza i risultati'),
+                    child: const Text(
+                        'Visualizza i risultati',
+                      style: TextStyle(
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    ),
                   ),
                 ],
               ),

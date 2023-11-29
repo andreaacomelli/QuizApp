@@ -35,8 +35,9 @@ class QuizResult extends StatelessWidget {
           'Risultato del quiz',
           textAlign: TextAlign.center,
           style: TextStyle(
+            fontFamily: 'Poppins',
             fontSize: 18.0,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
           ),
         ),
         backgroundColor: Colors.deepPurpleAccent,
@@ -45,13 +46,7 @@ class QuizResult extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Risultati del Quiz',
-              style: TextStyle(
-                fontSize: 24.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            const Text('Risultati del Quiz'),
             const SizedBox(height: 20.0),
             Text('Domande corrette: $correctAnswers'),
             Text('Domande sbagliate: $incorrectAnswers'),
@@ -72,7 +67,14 @@ class QuizResult extends StatelessWidget {
                     borderRadius: BorderRadius.circular(32.0)),
                 minimumSize: const Size(150, 60),
               ),
-              child: const Text('Ritenta il Quiz'),
+              child: const Text(
+                  'Ritenta il Quiz',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ],
         ),
