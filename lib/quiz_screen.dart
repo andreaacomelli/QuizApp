@@ -70,8 +70,9 @@ class _QuizScreenState extends State<QuizScreen> {
 
       setState(() {
         _selectedOptionIndex = selectedIndex;
+        _currentQuestionIndex = currentQuestionIndex;
       });
-      _onNextQuestion();
+      Future.delayed(Duration.zero, _onNextQuestion);
     }
   }
 
@@ -96,43 +97,42 @@ class _QuizScreenState extends State<QuizScreen> {
     print("answeredQuestionsList: ${_answeredQuestionsList.length}");
     print("max questions: ${_maxQuestions}");
 
-    setState(() {
-      if (index! < (_maxQuestions - 1)) {
-        _currentQuestionIndex++;
+    if (index! < (_maxQuestions - 1)) {
+      _currentQuestionIndex++;
 
-        if (_quizResponses.containsKey(_currentQuestionIndex)) {
-          _selectedOptionIndex = _shuffledQuestions[_currentQuestionIndex]
-              .answerOptions
-              .indexOf(_quizResponses[_currentQuestionIndex]!.selectedAnswer);
-        } else {
-          _selectedOptionIndex = -1;
-        }
-
-        _pageController.nextPage(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.ease,
-        );
+      if (_quizResponses.containsKey(_currentQuestionIndex)) {
+        _selectedOptionIndex = _shuffledQuestions[_currentQuestionIndex]
+            .answerOptions
+            .indexOf(_quizResponses[_currentQuestionIndex]!.selectedAnswer);
       } else {
-        if (index <= 14) {
-        } else if (_answeredQuestionsList.length == _maxQuestions) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (BuildContext context) => QuizResult(
-                correctAnswers: _correctAnswers,
-                incorrectAnswers: _incorrectAnswers,
-                totalQuestions: _totalQuestions,
-                shuffledQuestions: _shuffledQuestions,
-                selectedOptionIndex: _selectedOptionIndex,
-                answerOptions: _questions[_currentQuestionIndex].answerOptions,
-                questions: _questions,
-                currentQuestion: _questions[_currentQuestionIndex],
-                quizResponses: _quizResponses,
-              ),
-            ),
-          );
-        }
+        _selectedOptionIndex = -1;
       }
-    });
+
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
+    } else {
+      if (index <= 14) {
+      } else if (_answeredQuestionsList.length == _maxQuestions) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (BuildContext context) => QuizResult(
+              correctAnswers: _correctAnswers,
+              incorrectAnswers: _incorrectAnswers,
+              totalQuestions: _totalQuestions,
+              shuffledQuestions: _shuffledQuestions,
+              selectedOptionIndex: _selectedOptionIndex,
+              answerOptions: _questions[_currentQuestionIndex].answerOptions,
+              questions: _questions,
+              currentQuestion: _questions[_currentQuestionIndex],
+              quizResponses: _quizResponses,
+            ),
+          ),
+        );
+      }
+    }
+    setState(() {});
   }
 
   List<Question> _shuffleQuestions(List<Question> questions) {
@@ -169,6 +169,7 @@ class _QuizScreenState extends State<QuizScreen> {
           final answerOptions = questionData.answerOptions;
 
           return QuestionWidget(
+            key: PageStorageKey<String>('question_$index'),
             currentQuestionIndex: _currentQuestionIndex,
             questionText: questionText,
             answerOptions: answerOptions,
@@ -180,53 +181,56 @@ class _QuizScreenState extends State<QuizScreen> {
       ),
       floatingActionButton: _answeredQuestions >= _maxQuestions
           ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    'Rispondi a tutte le $_maxQuestions domande',
-                    style: const TextStyle(
-                      fontSize: 18.0,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'Rispondi a tutte le $_maxQuestions domande',
+                      style: const TextStyle(
+                        fontSize: 18.0,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (BuildContext context) => QuizResult(
-                            correctAnswers: _correctAnswers,
-                            incorrectAnswers: _incorrectAnswers,
-                            totalQuestions: _totalQuestions,
-                            shuffledQuestions: _shuffledQuestions,
-                            selectedOptionIndex: _selectedOptionIndex,
-                            answerOptions:
-                                _questions[_currentQuestionIndex].answerOptions,
-                            questions: _questions,
-                            currentQuestion: _questions[_currentQuestionIndex],
-                            quizResponses: _quizResponses,
+                    const SizedBox(height: 20.0),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) => QuizResult(
+                              correctAnswers: _correctAnswers,
+                              incorrectAnswers: _incorrectAnswers,
+                              totalQuestions: _totalQuestions,
+                              shuffledQuestions: _shuffledQuestions,
+                              selectedOptionIndex: _selectedOptionIndex,
+                              answerOptions: _questions[_currentQuestionIndex]
+                                  .answerOptions,
+                              questions: _questions,
+                              currentQuestion:
+                                  _questions[_currentQuestionIndex],
+                              quizResponses: _quizResponses,
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurpleAccent,
-                      foregroundColor: Colors.white,
-                      shadowColor: Colors.deepPurple,
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(32.0)),
-                    ),
-                    child: const Text(
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurpleAccent,
+                        foregroundColor: Colors.white,
+                        shadowColor: Colors.deepPurple,
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(32.0)),
+                      ),
+                      child: const Text(
                         'Visualizza i risultati',
-                      style: TextStyle(
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
+                        style: TextStyle(
+                          fontSize: 24.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             )
           : null,
