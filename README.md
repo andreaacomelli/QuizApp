@@ -1,2 +1,2 @@
 # QuizApp
-App di quiz in flutter per esame antincendio
+Applicazione quiz in flutter per test esame sicurezza aziendale
